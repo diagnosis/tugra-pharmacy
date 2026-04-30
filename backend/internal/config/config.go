@@ -12,6 +12,7 @@ type Config struct {
 	App      AppConfig
 	JWT      JWTConfig
 	Mailer   MailerConfig
+	Spaces   SpacesConfig
 }
 
 type DatabaseConfig struct {
@@ -54,6 +55,14 @@ type MailerConfig struct {
 	SMTPPassword             string
 	SMTPFrom                 string
 	RequireEmailVerification bool
+}
+
+type SpacesConfig struct {
+	Key    string
+	Secret string
+	Region string
+	Bucket string
+	CDNUrl string
 }
 
 func Load() (*Config, error) {
@@ -109,6 +118,13 @@ func Load() (*Config, error) {
 			SMTPPassword:             getEnv("SMTP_PASSWORD", ""),
 			SMTPFrom:                 getEnv("SMTP_FROM", "noreply@turkishpazar.us"),
 			RequireEmailVerification: getEnvBool("REQUIRE_EMAIL_VERIFICATION", true),
+		},
+		Spaces: SpacesConfig{
+			Key:    getEnv("DO_SPACES_KEY", ""),
+			Secret: getEnv("DO_SPACES_SECRET", ""),
+			Region: getEnv("DO_SPACES_REGION", "fra1"),
+			Bucket: getEnv("DO_SPACES_BUCKET", ""),
+			CDNUrl: getEnv("DO_SPACES_CDN_URL", ""),
 		},
 	}
 

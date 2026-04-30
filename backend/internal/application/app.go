@@ -10,18 +10,25 @@ import (
 	"github.com/diagnosis/tugra-pharmacy/internal/database"
 	authhandlers "github.com/diagnosis/tugra-pharmacy/internal/handlers/auth"
 	healthhandlers "github.com/diagnosis/tugra-pharmacy/internal/handlers/health"
+	producthandlers "github.com/diagnosis/tugra-pharmacy/internal/handlers/product"
+	"github.com/diagnosis/tugra-pharmacy/internal/spaces"
 	adminstore "github.com/diagnosis/tugra-pharmacy/internal/store/admin"
+	productstore "github.com/diagnosis/tugra-pharmacy/internal/store/product"
+	refreshtokenstore "github.com/diagnosis/tugra-pharmacy/internal/store/refreshtokenstore"
 )
 
 type Application struct {
 	//jwtSigner
 	adminJWT *secure.JWTSigner
 	//stores
-	adminStore adminstore.AdminStore
+	adminStore        adminstore.AdminStore
+	refreshTokenStore refreshtokenstore.RefreshTokenStore
+	productStore      productstore.ProductStore
 
 	//handlers
-	healthHandler *healthhandlers.HealthHandler
-	authHandler   *authhandlers.AuthHandler
+	healthHandler   *healthhandlers.HealthHandler
+	authHandler     *authhandlers.AuthHandler
+	productHandlers *producthandlers.ProductHandler
 }
 
 func NewApplication() (*Application, error) {
@@ -51,16 +58,27 @@ func NewApplication() (*Application, error) {
 	if err != nil {
 		logger.Fatal(ctx, "failed to set admin jwt signer", "err", err)
 	}
+	//spaces
+	spaceClient, err := spaces.NewClient(cfg)
+	if err != nil {
+		logger.Fatal(ctx, "failed to connect do space", "err", err)
+	}
 
 	//store
 	adminStore := adminstore.NewAdminPGStore(pool)
+	refreshTokenStore := refreshtokenstore.NewRefreshTokenPGStore(pool)
+	productStore := productstore.NewProductPGStore(pool)
 	//handlers
 	healthHandler := healthhandlers.NewHealthHandler()
-	authHandlers := authhandlers.NewAuthHandler()
+	authHandlers := authhandlers.NewAuthHandler(cfg, adminJWT, adminStore, refreshTokenStore)
+	productHandler := producthandlers.NewProductHandler(cfg, productStore, spaceClient)
 	return &Application{
 		adminJWT,
 		adminStore,
+		refreshTokenStore,
+		productStore,
 		healthHandler,
 		authHandlers,
+		productHandler,
 	}, nil
 }
