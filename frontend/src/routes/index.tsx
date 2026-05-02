@@ -1,14 +1,20 @@
+// src/routes/index.tsx
 import { createFileRoute } from '@tanstack/react-router'
-import {Hero} from "@/components/app/Hero.tsx";
+import { Hero } from '@/components/app/Hero'
+import { FeaturedProducts } from '@/components/app/FeaturedProducts'
+import {SeoHead} from "@/lib/seo/SEOHead.tsx";
 
 export const Route = createFileRoute('/')({
-  component: RouteComponent,
+    component: HomePage,
 })
 
-function RouteComponent() {
-  return (
-      <>
-        <Hero/>
-      </>
-  )
+function HomePage() {
+    return (
+        <>
+            <SeoHead page="home" canonicalPath="/"/>
+            <Hero />
+            <FeaturedProducts />
+        </>
+    )
 }
+

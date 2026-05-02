@@ -3,6 +3,7 @@ import { useLang } from '@/lib/i18n/LangContext.tsx'
 import { Cross, MapPin, ArrowRight } from '@/lib/icons.ts'
 import { Sun } from 'lucide-react'
 import { featureIcons, categoryIcons } from '@/lib/icons.ts'
+import { Link } from '@tanstack/react-router'
 
 const CATEGORY_KEYS = ['medications', 'vitamins', 'suncare', 'skincare', 'haircare', 'baby', 'firstaid', 'devices'] as const
 
@@ -21,7 +22,7 @@ export function Hero() {
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#1a6b4a]/3" />
             </div>
 
-            <div className="relative max-w-7xl mx-auto px-6 py-20 md:py-28">
+            <div className="relative max-w-7xl mx-auto px-6 py-12 md:py-16">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
                     {/* Left — text content */}
@@ -69,34 +70,36 @@ export function Hero() {
 
                         {/* CTAs */}
                         <div className="flex items-center gap-4 flex-wrap">
-                            <a
-                                href="#products"
+                            <Link
+                                to="/products"
                                 className="
-                  inline-flex items-center gap-2
-                  bg-[#1a6b4a] text-white
-                  px-6 py-3.5 rounded-xl
-                  text-sm font-semibold
-                  shadow-[0_4px_16px_rgba(26,107,74,0.35)]
-                  hover:bg-[#165c3f]
-                  hover:shadow-[0_8px_24px_rgba(26,107,74,0.45)]
-                  hover:-translate-y-0.5
-                  transition-all duration-200
-                "
+    inline-flex items-center gap-2
+    bg-[#1a6b4a] text-white
+    px-6 py-3.5 rounded-xl
+    text-sm font-semibold
+    shadow-[0_4px_16px_rgba(26,107,74,0.35)]
+    hover:bg-[#165c3f]
+    hover:shadow-[0_8px_24px_rgba(26,107,74,0.45)]
+    hover:-translate-y-0.5
+    transition-all duration-200
+  "
                             >
                                 {t.hero.cta}
                                 <ArrowRight className="w-4 h-4" />
-                            </a>
+                            </Link>
                             <a
-                                href="#contact"
+                                href="https://maps.app.goo.gl/aF7kWSV46eGwWg298"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="
-                  inline-flex items-center gap-2
-                  bg-white/80 text-[#1a6b4a]
-                  px-6 py-3.5 rounded-xl
-                  text-sm font-semibold
-                  border border-[#c8e6d4]
-                  hover:bg-white hover:border-[#1a6b4a]/30
-                  transition-all duration-200
-                "
+    inline-flex items-center gap-2
+    bg-white/80 text-[#1a6b4a]
+    px-6 py-3.5 rounded-xl
+    text-sm font-semibold
+    border border-[#c8e6d4]
+    hover:bg-white hover:border-[#1a6b4a]/30
+    transition-all duration-200
+  "
                             >
                                 <MapPin className="w-4 h-4" />
                                 {t.contact.directions}
@@ -154,7 +157,8 @@ export function Hero() {
                                         return (
                                             <div
                                                 key={key}
-                                                className="relative group aspect-square rounded-xl bg-[#f0faf6] border border-[#c8e6d4]/50 flex items-center justify-center hover:bg-[#e0f5ea] transition-colors duration-200 cursor-default"
+                                                className="relative group aspect-square rounded-xl flex items-center justify-center transition-all duration-200 cursor-default hover:scale-105"
+                                                style={{ backgroundColor: cat?.bg }}
                                             >
                                                 {cat && <cat.icon className="w-5 h-5" style={{ color: cat.color }} />}
 

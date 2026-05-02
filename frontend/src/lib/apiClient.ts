@@ -108,4 +108,24 @@ export const apiClient = {
         }),
     del:  <T>(endpoint: string, init?: RequestInit & { skipAuthRefresh?: boolean }) =>
         request<T>(endpoint, { ...init, method: 'DELETE' }),
+    put: <T>(endpoint: string, body?: unknown, init?: RequestInit & {skipAuthRefresh?: boolean}) =>
+        request<T>(endpoint, {
+            ...init,
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', ...(init?.headers as any) },
+            body: body == null ? undefined : JSON.stringify(body),
+        }),
+    postForm: <T>(endpoint: string, form: FormData, init?: RequestInit & { skipAuthRefresh?: boolean}) =>
+        request<T>(endpoint, {
+            ...init,
+            method: 'POST',
+            body: form,
+        }),
+    putForm: <T>(endpoint: string, form: FormData, init?: RequestInit & { skipAuthRefresh?: boolean }) =>
+        request<T>(endpoint, {
+            ...init,
+            method: 'PUT',
+            body: form,
+        }),
+
 }

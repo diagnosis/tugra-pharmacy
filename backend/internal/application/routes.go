@@ -21,8 +21,8 @@ func SetupRoutes(app *Application) *chi.Mux {
 	//health
 	r.Get("/api/health", app.healthHandler.HandleHealth)
 	//public
-	r.Get("/api/products", app.productHandlers.List)
-	r.Get("/api/products/{id}", app.productHandlers.GetByID)
+	r.Get("/api/products", app.productHandlers.HandleList)
+	r.Get("/api/products/{id}", app.productHandlers.HandleGetByID)
 
 	//auth
 	r.Route("/api/auth", func(r chi.Router) {
@@ -34,9 +34,13 @@ func SetupRoutes(app *Application) *chi.Mux {
 	//protected
 	r.Route("/api/admin", func(r chi.Router) {
 		r.Use(middleware.RequireAuth(AdminAuthFunction(app.adminJWT)))
-		r.Post("/products", app.productHandlers.Create)
-		r.Put("/products/{id}", app.productHandlers.Update)
-		r.Delete("/products/{id}", app.productHandlers.Delete)
+		r.Get("/me", app.authHandler.HandleMe)
+		r.Post("/products", app.productHandlers.HandleCreate)
+		r.Put("/products/{id}", app.productHandlers.HandleUpdate)
+		r.Delete("/products/{id}", app.productHandlers.HandleDelete)
+		r.Post("/products/{id}/image", app.productHandlers.HandleUploadImage)
+		r.Delete("/products/{id}/image", app.productHandlers.HandleRemoveImage)
+		r.Patch("/products/{id}/featured", app.productHandlers.HandleToggleIsFeatured)
 	})
 
 	return r

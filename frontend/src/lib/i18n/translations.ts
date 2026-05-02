@@ -2,6 +2,17 @@
 
 export const translations = {
     en: {
+        meta: {
+            homeTitle: 'Tuğra Pharmacy Belek | Open Daily 08:00–22:00',
+            homeDesc: 'Pharmacy in Belek, Antalya. Medications, suncare, vitamins, baby products. Open daily 08:00–22:00. English, Turkish, Russian, German spoken.',
+            productsTitle: 'Products | Tuğra Pharmacy Belek',
+            productsDesc: 'Browse medications, vitamins, suncare, skincare and more at Tuğra Pharmacy in Belek, Antalya.',
+            aboutTitle: 'About Us | Tuğra Pharmacy Belek',
+            aboutDesc: 'Tuğra Pharmacy is located in the heart of Belek, Antalya. Serving tourists and locals in 4 languages since opening.',
+            contactTitle: 'Contact & Location | Tuğra Pharmacy Belek',
+            contactDesc: 'Find Tuğra Pharmacy in Belek, Antalya. Address: 46. Sk. No:3, Serik. Open daily 08:00–22:00. Call +90 242 715 24 09.',
+            keywords: 'pharmacy belek, belek pharmacy, antalya pharmacy, eczane belek, medications belek, sunscreen belek',
+        },
         nav: {
             home: 'Home',
             products: 'Products',
@@ -40,8 +51,8 @@ export const translations = {
         },
         contact: {
             title: 'Find Us',
-            address: 'Belek, Antalya, Turkey',
-            phone: '+90 242 000 00 00',
+            address: 'Belek, 46. Sk. No:3, 07506 Serik/Antalya',
+            phone: '+90 242 715 24 09',
             hours: '08:00 – 22:00 every day',
             directions: 'Get Directions',
         },
@@ -70,6 +81,17 @@ export const translations = {
     },
 
     tr: {
+        meta: {
+            homeTitle: 'Tuğra Eczanesi Belek | Her Gün 08:00–22:00 Açık',
+            homeDesc: 'Belek, Antalya\'da eczane. İlaçlar, güneş bakımı, vitaminler, bebek ürünleri. Her gün 08:00–22:00 açık. 4 dilde hizmet.',
+            productsTitle: 'Ürünler | Tuğra Eczanesi Belek',
+            productsDesc: 'Tuğra Eczanesi\'nde ilaçlar, vitaminler, güneş bakımı, cilt bakımı ve daha fazlasını keşfedin.',
+            aboutTitle: 'Hakkımızda | Tuğra Eczanesi Belek',
+            aboutDesc: 'Tuğra Eczanesi, Belek\'in kalbinde yer almaktadır. Turistlere ve yerel halka 4 dilde hizmet vermektedir.',
+            contactTitle: 'İletişim ve Konum | Tuğra Eczanesi Belek',
+            contactDesc: 'Tuğra Eczanesi\'ni Belek\'te bulun. Adres: 46. Sk. No:3, Serik. Her gün 08:00–22:00. Tel: +90 242 715 24 09.',
+            keywords: 'eczane belek, belek eczane, antalya eczane, belek ilaç, serik eczane',
+        },
         nav: {
             home: 'Ana Sayfa',
             products: 'Ürünler',
@@ -108,8 +130,8 @@ export const translations = {
         },
         contact: {
             title: 'Bizi Bulun',
-            address: 'Belek, Antalya, Türkiye',
-            phone: '+90 242 000 00 00',
+            address: 'Belek, 46. Sk. No:3, 07506 Serik/Antalya',
+            phone: '+90 242 715 24 09',
             hours: 'Her gün 08:00 – 22:00',
             directions: 'Yol Tarifi Al',
         },
@@ -138,6 +160,17 @@ export const translations = {
     },
 
     ru: {
+        meta: {
+            homeTitle: 'Аптека Тугра Белек | Открыто каждый день 08:00–22:00',
+            homeDesc: 'Аптека в Белеке, Анталья. Лекарства, солнцезащитные средства, витамины, товары для детей. Открыто ежедневно 08:00–22:00. Говорим по-русски.',
+            productsTitle: 'Товары | Аптека Тугра Белек',
+            productsDesc: 'Лекарства, витамины, солнцезащита, уход за кожей и многое другое в аптеке Тугра в Белеке, Анталья.',
+            aboutTitle: 'О нас | Аптека Тугра Белек',
+            aboutDesc: 'Аптека Тугра расположена в центре Белека, Анталья. Обслуживаем туристов и местных жителей на 4 языках.',
+            contactTitle: 'Контакты и адрес | Аптека Тугра Белек',
+            contactDesc: 'Аптека Тугра в Белеке, Анталья. Адрес: 46. Sk. No:3, Serik. Ежедневно 08:00–22:00. Тел: +90 242 715 24 09.',
+            keywords: 'аптека белек, аптека анталья, белек аптека, лекарства белек, аптека турция',
+        },
         nav: {
             home: 'Главная',
             products: 'Товары',
@@ -176,8 +209,8 @@ export const translations = {
         },
         contact: {
             title: 'Как нас найти',
-            address: 'Белек, Анталья, Турция',
-            phone: '+90 242 000 00 00',
+            address: 'Belek, 46. Sk. No:3, 07506 Serik/Antalya',
+            phone: '+90 242 715 24 09',
             hours: 'Ежедневно 08:00 – 22:00',
             directions: 'Маршрут',
         },
@@ -206,6 +239,17 @@ export const translations = {
     },
 
     de: {
+        meta: {
+            homeTitle: 'Tuğra Apotheke Belek | Täglich geöffnet 08:00–22:00',
+            homeDesc: 'Apotheke in Belek, Antalya. Medikamente, Sonnenpflege, Vitamine, Babyprodukte. Täglich 08:00–22:00 geöffnet. Deutsch wird gesprochen.',
+            productsTitle: 'Produkte | Tuğra Apotheke Belek',
+            productsDesc: 'Medikamente, Vitamine, Sonnenpflege, Hautpflege und mehr in der Tuğra Apotheke in Belek, Antalya.',
+            aboutTitle: 'Über uns | Tuğra Apotheke Belek',
+            aboutDesc: 'Die Tuğra Apotheke liegt im Herzen von Belek, Antalya. Wir bedienen Touristen und Einheimische in 4 Sprachen.',
+            contactTitle: 'Kontakt & Standort | Tuğra Apotheke Belek',
+            contactDesc: 'Tuğra Apotheke in Belek, Antalya. Adresse: 46. Sk. No:3, Serik. Täglich 08:00–22:00. Tel: +90 242 715 24 09.',
+            keywords: 'apotheke belek, belek apotheke, antalya apotheke, medikamente belek, apotheke türkei',
+        },
         nav: {
             home: 'Startseite',
             products: 'Produkte',
@@ -244,8 +288,8 @@ export const translations = {
         },
         contact: {
             title: 'Finden Sie uns',
-            address: 'Belek, Antalya, Türkei',
-            phone: '+90 242 000 00 00',
+            address: 'Belek, 46. Sk. No:3, 07506 Serik/Antalya',
+            phone: '+90 242 715 24 09',
             hours: 'Täglich 08:00 – 22:00',
             directions: 'Wegbeschreibung',
         },

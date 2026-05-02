@@ -58,7 +58,7 @@ export function Footer() {
                                 {t.contact.hours}
               </span>
                             <a
-                                href="https://maps.google.com/?q=Belek,Antalya,Turkey"
+                                href="https://maps.app.goo.gl/aF7kWSV46eGwWg298"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-2 hover:text-[#a7d4bc] transition-colors duration-200 w-fit"

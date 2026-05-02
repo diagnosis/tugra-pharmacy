@@ -20,23 +20,37 @@ type Product struct {
 	Category    string            `json:"category"`
 	Price       *float64          `json:"price"`
 	InStock     bool              `json:"in_stock"`
+	IsFeatured  bool              `json:"is_featured"`
 	ImageURL    string            `json:"image_url"`
 	CreatedAt   time.Time         `json:"created_at"`
 	UpdatedAt   time.Time         `json:"updated_at"`
 }
 
+type ProductListResult struct {
+	Products []*Product
+	Total    int
+}
+
 type ProductFilters struct {
-	Category *string
-	InStock  *bool
-	Search   *string
+	Category   *string
+	InStock    *bool
+	Search     *string
+	IsFeatured *bool
+	Limit      int
+	Offset     int
 }
 
 type ProductStore interface {
 	GetByID(ctx context.Context, id uuid.UUID) (*Product, error)
-	List(ctx context.Context, filters ProductFilters) ([]*Product, error)
+	List(ctx context.Context, filters ProductFilters) (*ProductListResult, error)
 	Create(ctx context.Context, p *Product) (*Product, error)
 	Update(ctx context.Context, id uuid.UUID, p *Product) (*Product, error)
 	Delete(ctx context.Context, id uuid.UUID) error
+	// image updates
+	UpdateImage(ctx context.Context, id uuid.UUID, imageURL string) error
+	DeleteImage(ctx context.Context, id uuid.UUID) error
+
+	ToggleFeatured(ctx context.Context, id uuid.UUID, featured bool) error
 }
 
 type ProductPGStore struct {
@@ -49,7 +63,7 @@ func NewProductPGStore(pool *pgxpool.Pool) *ProductPGStore {
 
 func (s *ProductPGStore) GetByID(ctx context.Context, id uuid.UUID) (*Product, error) {
 	q := `
-		SELECT id, name, description, category, price, in_stock, image_url, created_at, updated_at
+		SELECT id, name, description, category, price, in_stock, is_featured, image_url, created_at, updated_at
 		FROM products
 		WHERE id = $1
 	`
@@ -63,38 +77,59 @@ func (s *ProductPGStore) GetByID(ctx context.Context, id uuid.UUID) (*Product, e
 	}
 	return p, nil
 }
-
-func (s *ProductPGStore) List(ctx context.Context, filters ProductFilters) ([]*Product, error) {
-	q := `
-		SELECT id, name, description, category, price, in_stock, image_url, created_at, updated_at
-		FROM products
-		WHERE 1=1
-	`
+func (s *ProductPGStore) List(ctx context.Context, filters ProductFilters) (*ProductListResult, error) {
+	// build WHERE clause args (shared between count and data queries)
+	where := " WHERE 1=1"
 	args := []any{}
 	i := 1
 
 	if filters.Category != nil {
-		q += fmt.Sprintf(" AND category = $%d", i)
+		where += fmt.Sprintf(" AND category = $%d", i)
 		args = append(args, *filters.Category)
 		i++
 	}
-
 	if filters.InStock != nil {
-		q += fmt.Sprintf(" AND in_stock = $%d", i)
+		where += fmt.Sprintf(" AND in_stock = $%d", i)
 		args = append(args, *filters.InStock)
 		i++
 	}
-
-	if filters.Search != nil {
-		// search across all 4 language values in the JSONB column
-		q += fmt.Sprintf(" AND name::text ILIKE $%d", i)
-		args = append(args, "%"+*filters.Search+"%")
+	if filters.IsFeatured != nil {
+		where += fmt.Sprintf(" AND is_featured = $%d", i)
+		args = append(args, *filters.IsFeatured)
 		i++
 	}
+	if filters.Search != nil {
+		where += fmt.Sprintf(` AND (
+        name->>'en' ILIKE $%d OR
+        name->>'tr' ILIKE $%d OR
+        name->>'ru' ILIKE $%d OR
+        name->>'de' ILIKE $%d
+    )`, i, i+1, i+2, i+3)
+		args = append(args,
+			"%"+*filters.Search+"%",
+			"%"+*filters.Search+"%",
+			"%"+*filters.Search+"%",
+			"%"+*filters.Search+"%",
+		)
+		i += 4
+	}
 
-	q += " ORDER BY created_at DESC"
+	// count query — same WHERE, no LIMIT
+	var total int
+	countQ := "SELECT COUNT(*) FROM products" + where
+	if err := s.pool.QueryRow(ctx, countQ, args...).Scan(&total); err != nil {
+		return nil, err
+	}
 
-	rows, err := s.pool.Query(ctx, q, args...)
+	// data query — add ORDER BY + LIMIT/OFFSET
+	dataQ := `SELECT id, name, description, category, price, in_stock, is_featured, image_url, created_at, updated_at FROM products` + where
+	dataQ += " ORDER BY created_at DESC"
+	if filters.Limit > 0 {
+		dataQ += fmt.Sprintf(" LIMIT $%d OFFSET $%d", i, i+1)
+		args = append(args, filters.Limit, filters.Offset)
+	}
+
+	rows, err := s.pool.Query(ctx, dataQ, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -108,19 +143,21 @@ func (s *ProductPGStore) List(ctx context.Context, filters ProductFilters) ([]*P
 		}
 		products = append(products, p)
 	}
-
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
+	if products == nil {
+		products = []*Product{}
+	}
 
-	return products, nil
+	return &ProductListResult{Products: products, Total: total}, nil
 }
 
 func (s *ProductPGStore) Create(ctx context.Context, p *Product) (*Product, error) {
 	q := `
-		INSERT INTO products (name, description, category, price, in_stock, image_url)
-		VALUES ($1, $2, $3, $4, $5, $6)
-		RETURNING id, name, description, category, price, in_stock, image_url, created_at, updated_at
+		INSERT INTO products (name, description, category, price, in_stock, is_featured, image_url)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		RETURNING id, name, description, category, price, in_stock, is_featured, image_url, created_at, updated_at
 	`
 	nameJSON, err := json.Marshal(p.Name)
 	if err != nil {
@@ -131,7 +168,7 @@ func (s *ProductPGStore) Create(ctx context.Context, p *Product) (*Product, erro
 		return nil, err
 	}
 
-	row := s.pool.QueryRow(ctx, q, nameJSON, descJSON, p.Category, p.Price, p.InStock, p.ImageURL)
+	row := s.pool.QueryRow(ctx, q, nameJSON, descJSON, p.Category, p.Price, p.InStock, p.IsFeatured, p.ImageURL)
 	created, err := scanProduct(row)
 	if err != nil {
 		return nil, err
@@ -147,10 +184,11 @@ func (s *ProductPGStore) Update(ctx context.Context, id uuid.UUID, p *Product) (
 		    category    = $3,
 		    price       = $4,
 		    in_stock    = $5,
-		    image_url   = $6,
+		    is_featured = $6,
+		    image_url   = $7,
 		    updated_at  = now()
-		WHERE id = $7
-		RETURNING id, name, description, category, price, in_stock, image_url, created_at, updated_at
+		WHERE id = $8
+		RETURNING id, name, description, category, price, in_stock, is_featured, image_url, created_at, updated_at
 	`
 	nameJSON, err := json.Marshal(p.Name)
 	if err != nil {
@@ -161,7 +199,16 @@ func (s *ProductPGStore) Update(ctx context.Context, id uuid.UUID, p *Product) (
 		return nil, err
 	}
 
-	row := s.pool.QueryRow(ctx, q, nameJSON, descJSON, p.Category, p.Price, p.InStock, p.ImageURL, id)
+	row := s.pool.QueryRow(ctx, q,
+		nameJSON,
+		descJSON,
+		p.Category,
+		p.Price,
+		p.InStock,
+		p.IsFeatured,
+		p.ImageURL,
+		id,
+	)
 	updated, err := scanProduct(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -184,6 +231,41 @@ func (s *ProductPGStore) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
+func (s *ProductPGStore) UpdateImage(ctx context.Context, id uuid.UUID, imageURL string) error {
+	q := `UPDATE products SET image_url = $1, updated_at = now() WHERE id = $2`
+	result, err := s.pool.Exec(ctx, q, imageURL, id)
+	if err != nil {
+		return err
+	}
+	if result.RowsAffected() == 0 {
+		return errors2.NotFound("product not found", "product not found")
+	}
+	return nil
+}
+
+func (s *ProductPGStore) DeleteImage(ctx context.Context, id uuid.UUID) error {
+	q := `UPDATE products SET image_url = '', updated_at = now() WHERE id = $1`
+	result, err := s.pool.Exec(ctx, q, id)
+	if err != nil {
+		return err
+	}
+	if result.RowsAffected() == 0 {
+		return errors2.NotFound("product not found", "product not found")
+	}
+	return nil
+}
+
+func (s *ProductPGStore) ToggleFeatured(ctx context.Context, id uuid.UUID, featured bool) error {
+	q := `UPDATE products SET is_featured = $1, updated_at = now() WHERE id = $2`
+	result, err := s.pool.Exec(ctx, q, featured, id)
+	if err != nil {
+		return err
+	}
+	if result.RowsAffected() == 0 {
+		return errors2.NotFound("product not found", "product not found")
+	}
+	return nil
+}
 func scanProduct(row pgx.Row) (*Product, error) {
 	var p Product
 	var nameJSON, descJSON []byte
@@ -195,6 +277,7 @@ func scanProduct(row pgx.Row) (*Product, error) {
 		&p.Category,
 		&p.Price,
 		&p.InStock,
+		&p.IsFeatured, // 👈 add
 		&p.ImageURL,
 		&p.CreatedAt,
 		&p.UpdatedAt,

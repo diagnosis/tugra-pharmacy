@@ -1,8 +1,10 @@
 // src/components/app/Header.tsx
 import { useState, useEffect } from 'react'
+import { Link, useLocation } from '@tanstack/react-router'
 import { useLang } from '@/lib/i18n/LangContext.tsx'
 import { type Lang } from '@/lib/i18n/translations.ts'
 import { Cross, Menu, X } from '@/lib/icons.ts'
+import {type Currency, useCurrency} from "@/lib/currency/CurrencyContext.tsx";
 
 const LANGS = [
     { code: 'en', flag: '🇬🇧', label: 'EN' },
@@ -10,18 +12,25 @@ const LANGS = [
     { code: 'ru', flag: '🇷🇺', label: 'RU' },
     { code: 'de', flag: '🇩🇪', label: 'DE' },
 ]
+const CURRENCIES: { code: Currency; label: string }[] = [
+    { code: 'TRY', label: '₺' },
+    { code: 'EUR', label: '€' },
+    { code: 'USD', label: '$' },
+]
 
 const NAV_LINKS = [
-    { key: 'home',     href: '#home'     },
-    { key: 'products', href: '#products' },
-    { key: 'about',    href: '#about'    },
-    { key: 'contact',  href: '#contact'  },
+    { key: 'home',     to: '/'         },
+    { key: 'products', to: '/products' },
+    { key: 'about',    to: '/about'    },
+    { key: 'contact',  to: '/contact'  },
 ] as const
 
 export function Header() {
     const { lang, setLang, t } = useLang()
+    const { currency, setCurrency } = useCurrency()
     const [scrolled, setScrolled] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false)
+    const { pathname } = useLocation()
 
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 48)
@@ -40,6 +49,12 @@ export function Header() {
         return () => { document.body.style.overflow = '' }
     }, [menuOpen])
 
+    // close menu on route change
+    useEffect(() => { setMenuOpen(false) }, [pathname])
+
+    const isActive = (to: string) =>
+        to === '/' ? pathname === '/' : pathname.startsWith(to)
+
     return (
         <>
             <header
@@ -55,7 +70,7 @@ export function Header() {
                     <div className="flex items-center justify-between gap-6">
 
                         {/* Logo */}
-                        <a href="#home" className="flex items-center gap-2.5 shrink-0 group">
+                        <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
                             <div className="
                 w-9 h-9 rounded-xl bg-[#1a6b4a] text-white
                 flex items-center justify-center
@@ -72,30 +87,50 @@ export function Header() {
                             >
                 Tuğra
               </span>
-                        </a>
+                        </Link>
 
                         {/* Desktop Nav */}
                         <nav className="hidden md:flex items-center gap-8">
                             {NAV_LINKS.map(link => (
-                                <a
-                                    key={link.href}
-                                    href={link.href}
-                                    className="
-                    text-sm font-medium text-[#2d5a47] hover:text-[#1a6b4a]
-                    transition-colors duration-200 relative
+                                <Link
+                                    key={link.to}
+                                    to={link.to}
+                                    className={`
+                    text-sm font-medium transition-colors duration-200 relative
                     after:absolute after:bottom-[-3px] after:left-0 after:right-0
                     after:h-[1.5px] after:bg-[#1a6b4a] after:rounded-full
-                    after:scale-x-0 hover:after:scale-x-100
                     after:transition-transform after:duration-200 after:origin-left
-                  "
+                    ${isActive(link.to)
+                                        ? 'text-[#1a6b4a] after:scale-x-100'
+                                        : 'text-[#2d5a47] hover:text-[#1a6b4a] after:scale-x-0 hover:after:scale-x-100'
+                                    }
+                  `}
                                 >
                                     {t.nav[link.key]}
-                                </a>
+                                </Link>
                             ))}
                         </nav>
 
                         {/* Right: lang switcher + burger */}
                         <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1 bg-white/60 backdrop-blur-sm rounded-xl p-1 border border-[#c8e6d4]/60">
+                                {CURRENCIES.map(c => (
+                                    <button
+                                        key={c.code}
+                                        onClick={() => setCurrency(c.code)}
+                                        className={`
+        px-2 py-1 rounded-lg text-xs font-semibold
+        transition-all duration-200 cursor-pointer
+        ${currency === c.code
+                                            ? 'bg-[#1a6b4a] text-white shadow-[0_2px_8px_rgba(26,107,74,0.3)]'
+                                            : 'text-[#2d5a47] hover:bg-[#d1f0e0]/60'
+                                        }
+      `}
+                                    >
+                                        {c.label}
+                                    </button>
+                                ))}
+                            </div>
                             <div className="flex items-center gap-1 bg-white/60 backdrop-blur-sm rounded-xl p-1 border border-[#c8e6d4]/60">
                                 {LANGS.map(l => (
                                     <button
@@ -137,18 +172,20 @@ export function Header() {
         `}>
                     <nav className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-1">
                         {NAV_LINKS.map(link => (
-                            <a
-                                key={link.href}
-                                href={link.href}
-                                onClick={() => setMenuOpen(false)}
-                                className="
-                  text-base font-medium text-[#1a6b4a]
-                  hover:bg-[#d1f0e0]/50
-                  px-4 py-3 rounded-xl transition-colors duration-200
-                "
+                            <Link
+                                key={link.to}
+                                to={link.to}
+                                className={`
+                  text-base font-medium px-4 py-3 rounded-xl
+                  transition-colors duration-200
+                  ${isActive(link.to)
+                                    ? 'bg-[#1a6b4a]/10 text-[#1a6b4a] font-semibold'
+                                    : 'text-[#1a6b4a] hover:bg-[#d1f0e0]/50'
+                                }
+                `}
                             >
                                 {t.nav[link.key]}
-                            </a>
+                            </Link>
                         ))}
                     </nav>
                 </div>

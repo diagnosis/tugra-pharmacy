@@ -1,5 +1,6 @@
 // src/lib/i18n/LangContext.tsx
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, type ReactNode } from 'react'
+import { useLocalStorage } from 'usehooks-ts'
 import { translations, type Lang, type Translations } from './translations'
 
 interface LangContextType {
@@ -10,25 +11,19 @@ interface LangContextType {
 
 const LangContext = createContext<LangContextType | null>(null)
 
-export function LangProvider({ children }: { children: React.ReactNode }) {
-    const [lang, setLangState] = useState<Lang>(() => {
-        const saved = localStorage.getItem('tugra_lang') as Lang
-        if (saved && translations[saved]) return saved
-        const browser = navigator.language?.slice(0, 2) as Lang
-        if (translations[browser]) return browser
-        return 'en'
-    })
+function detectBrowserLang(): Lang {
+    const browser = navigator.language?.slice(0, 2) as Lang
+    return translations[browser] ? browser : 'en'
+}
 
-    const setLang = (l: Lang) => {
-        setLangState(l)
-        localStorage.setItem('tugra_lang', l)
-    }
+export function LangProvider({ children }: { children: ReactNode }) {
+    const [lang, setLang] = useLocalStorage<Lang>('tugra_lang', detectBrowserLang())
 
     return (
         <LangContext.Provider value={{ lang, t: translations[lang], setLang }}>
-    {children}
-    </LangContext.Provider>
-)
+            {children}
+        </LangContext.Provider>
+    )
 }
 
 export function useLang() {
