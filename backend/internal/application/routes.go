@@ -11,7 +11,7 @@ import (
 func SetupRoutes(app *Application) *chi.Mux {
 	allowedOrigins := []string{
 		"http://localhost:5173",
-		"https://tugra-pharmacy.vercel.app/",
+		"https://tugra-pharmacy.vercel.app",
 	}
 
 	r := chi.NewRouter()
