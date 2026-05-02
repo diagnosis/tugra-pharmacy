@@ -1,5 +1,5 @@
 // src/components/admin/ProductForm.tsx
-import {useState, useRef, useEffect} from 'react'
+import {useState, useRef} from 'react'
 import { categoryIcons } from '@/lib/icons'
 import { Upload, X, CheckCircle } from 'lucide-react'
 import type { Product } from '@/services/productService'

@@ -4,7 +4,7 @@ import { useProduct } from '@/hooks/useProducts'
 import { useLang } from '@/lib/i18n/LangContext.tsx'
 import { categoryIcons } from '@/lib/icons'
 import { ArrowLeft, CheckCircle, XCircle, MapPin } from '@/lib/icons'
-import type { Product } from '@/lib/api/products'
+import type { Product } from '@/services/productService'
 import {useCurrency} from "@/lib/currency/CurrencyContext.tsx";
 
 type CategoryKey = keyof typeof categoryIcons
@@ -70,7 +70,7 @@ function ProductDetailPage() {
                                     <cat.icon className="w-4 h-4" style={{ color: cat.color }} />
                                 </div>
                                 <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: cat.color }}>
-                  {t.categories[product.category as CategoryKey]}
+                  {t.categories[product.category as keyof typeof t.categories]}
                 </span>
                             </div>
                         )}
