@@ -107,7 +107,7 @@ func (h *AuthHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 func (h *AuthHandler) setRefreshTokenCookie(w http.ResponseWriter, token string) {
 	// Production: Strict security with HTTPS
-	sameSite := http.SameSiteStrictMode
+	sameSite := http.SameSiteNoneMode
 	scr := true
 
 	if h.cfg.App.Env == "dev" {
