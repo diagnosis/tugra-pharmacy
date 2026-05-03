@@ -34,6 +34,7 @@ function ProductDetailPage() {
                 {/* Back */}
                 <Link
                     to="/products"
+                    search={{category:'all'}}
                     className="inline-flex items-center gap-2 text-sm font-medium text-[#2d5a47] hover:text-[#1a6b4a] transition-colors mb-8"
                 >
                     <ArrowLeft className="w-4 h-4" />
@@ -164,7 +165,7 @@ function ProductDetailError({ t }: { t: any }) {
         <div className="min-h-screen bg-[#f0faf6] flex items-center justify-center">
             <div className="text-center">
                 <p className="text-[#2d5a47]/60 mb-4">Product not found.</p>
-                <Link to="/products" className="text-sm font-semibold text-[#1a6b4a] hover:underline">
+                <Link to="/products" search={{category:'all'}} className="text-sm font-semibold text-[#1a6b4a] hover:underline">
                     ← {t.products.all}
                 </Link>
             </div>

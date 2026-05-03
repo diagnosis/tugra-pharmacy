@@ -42,6 +42,7 @@ export function FeaturedProducts() {
                     </div>
                     <Link
                         to="/products"
+                        search={{category:'all'}}
                         className="hidden sm:inline-flex items-center gap-2 shrink-0 text-sm font-semibold text-[#1a6b4a] hover:gap-3 transition-all duration-200"
                     >
                         {t.products.all}
@@ -83,6 +84,7 @@ export function FeaturedProducts() {
                         <div className="mt-4 text-center sm:hidden">
                             <Link
                                 to="/products"
+                                search={{category:'all'}}
                                 className="inline-flex items-center gap-2 bg-[#1a6b4a] text-white px-6 py-3 rounded-xl text-sm font-semibold shadow-[0_4px_12px_rgba(26,107,74,0.3)] hover:bg-[#165c3f] transition-all duration-200"
                             >
                                 {t.products.all}
