@@ -12,8 +12,14 @@ interface LangContextType {
 const LangContext = createContext<LangContextType | null>(null)
 
 function detectBrowserLang(): Lang {
-    const browser = navigator.language?.slice(0, 2) as Lang
-    return translations[browser] ? browser : 'en'
+    const stored = localStorage.getItem('tugra_lang') // underscore, matches useLocalStorage key
+    if (stored) return JSON.parse(stored) as Lang     // useLocalStorage stores as JSON string
+
+    const browserLang = navigator.language?.slice(0, 2).toLowerCase()
+    const supported: Lang[] = ['en', 'tr', 'ru', 'de']
+    if (supported.includes(browserLang as Lang)) return browserLang as Lang
+
+    return 'en'
 }
 
 export function LangProvider({ children }: { children: ReactNode }) {
