@@ -1,10 +1,10 @@
 // src/components/app/Header.tsx
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation } from '@tanstack/react-router'
 import { useLang } from '@/lib/i18n/LangContext.tsx'
 import { type Lang } from '@/lib/i18n/translations.ts'
-import { Cross, Menu, X } from '@/lib/icons.ts'
-import {type Currency, useCurrency} from "@/lib/currency/CurrencyContext.tsx";
+import { Cross, Menu, X, ChevronDown } from '@/lib/icons.ts'
+import { type Currency, useCurrency } from "@/lib/currency/CurrencyContext.tsx"
 
 const LANGS = [
     { code: 'en', flag: '🇬🇧', label: 'EN' },
@@ -30,6 +30,8 @@ export function Header() {
     const { currency, setCurrency } = useCurrency()
     const [scrolled, setScrolled] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false)
+    const [settingsOpen, setSettingsOpen] = useState(false)
+    const settingsRef = useRef<HTMLDivElement>(null)
     const { pathname } = useLocation()
 
     useEffect(() => {
@@ -49,44 +51,55 @@ export function Header() {
         return () => { document.body.style.overflow = '' }
     }, [menuOpen])
 
-    // close menu on route change
     useEffect(() => { setMenuOpen(false) }, [pathname])
+
+    // close settings dropdown on outside click
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (settingsRef.current && !settingsRef.current.contains(e.target as Node)) {
+                setSettingsOpen(false)
+            }
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [])
 
     const isActive = (to: string) =>
         to === '/' ? pathname === '/' : pathname.startsWith(to)
 
+    const currentLang = LANGS.find(l => l.code === lang)!
+    const currentCurrency = CURRENCIES.find(c => c.code === currency)!
+
     return (
         <>
-            <header
-                className={`
-          fixed top-0 left-0 right-0 z-50 transition-all duration-300
-          ${scrolled
-                    ? 'bg-[#f0faf6]/95 backdrop-blur-md shadow-[0_2px_24px_rgba(26,107,74,0.08)]'
-                    : 'bg-transparent'
-                }
-        `}
-            >
-                <div className="max-w-7xl mx-auto px-6 py-4">
-                    <div className="flex items-center justify-between gap-6">
+            <header className={`
+                fixed top-0 left-0 right-0 z-50 transition-all duration-300
+                ${scrolled
+                ? 'bg-[#f0faf6]/95 backdrop-blur-md shadow-[0_2px_24px_rgba(26,107,74,0.08)]'
+                : 'bg-transparent'
+            }
+            `}>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+                    <div className="flex items-center justify-between gap-3">
 
                         {/* Logo */}
                         <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
                             <div className="
-                w-9 h-9 rounded-xl bg-[#1a6b4a] text-white
-                flex items-center justify-center
-                shadow-[0_4px_12px_rgba(26,107,74,0.3)]
-                group-hover:shadow-[0_4px_20px_rgba(26,107,74,0.45)]
-                group-hover:bg-[#165c3f]
-                transition-all duration-300
-              ">
+                                w-9 h-9 rounded-xl bg-[#1a6b4a] text-white
+                                flex items-center justify-center
+                                shadow-[0_4px_12px_rgba(26,107,74,0.3)]
+                                group-hover:shadow-[0_4px_20px_rgba(26,107,74,0.45)]
+                                group-hover:bg-[#165c3f]
+                                transition-all duration-300
+                            ">
                                 <Cross className="w-4 h-4" />
                             </div>
                             <span
                                 style={{ fontFamily: "'Playfair Display', serif" }}
                                 className="text-xl font-bold text-[#0f2d1f] tracking-tight"
                             >
-                Tuğra
-              </span>
+                                Tuğra
+                            </span>
                         </Link>
 
                         {/* Desktop Nav */}
@@ -96,60 +109,121 @@ export function Header() {
                                     key={link.to}
                                     to={link.to}
                                     className={`
-                    text-sm font-medium transition-colors duration-200 relative
-                    after:absolute after:bottom-[-3px] after:left-0 after:right-0
-                    after:h-[1.5px] after:bg-[#1a6b4a] after:rounded-full
-                    after:transition-transform after:duration-200 after:origin-left
-                    ${isActive(link.to)
+                                        text-sm font-medium transition-colors duration-200 relative
+                                        after:absolute after:bottom-[-3px] after:left-0 after:right-0
+                                        after:h-[1.5px] after:bg-[#1a6b4a] after:rounded-full
+                                        after:transition-transform after:duration-200 after:origin-left
+                                        ${isActive(link.to)
                                         ? 'text-[#1a6b4a] after:scale-x-100'
                                         : 'text-[#2d5a47] hover:text-[#1a6b4a] after:scale-x-0 hover:after:scale-x-100'
                                     }
-                  `}
+                                    `}
                                 >
                                     {t.nav[link.key]}
                                 </Link>
                             ))}
                         </nav>
 
-                        {/* Right: lang switcher + burger */}
-                        <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1 bg-white/60 backdrop-blur-sm rounded-xl p-1 border border-[#c8e6d4]/60">
-                                {CURRENCIES.map(c => (
-                                    <button
-                                        key={c.code}
-                                        onClick={() => setCurrency(c.code)}
-                                        className={`
-        px-2 py-1 rounded-lg text-xs font-semibold
-        transition-all duration-200 cursor-pointer
-        ${currency === c.code
-                                            ? 'bg-[#1a6b4a] text-white shadow-[0_2px_8px_rgba(26,107,74,0.3)]'
-                                            : 'text-[#2d5a47] hover:bg-[#d1f0e0]/60'
-                                        }
-      `}
-                                    >
-                                        {c.label}
-                                    </button>
-                                ))}
+                        {/* Right controls */}
+                        <div className="flex items-center gap-2">
+
+                            {/* Desktop: separate currency + lang switchers */}
+                            <div className="hidden md:flex items-center gap-2">
+                                <div className="flex items-center gap-1 bg-white/60 backdrop-blur-sm rounded-xl p-1 border border-[#c8e6d4]/60">
+                                    {CURRENCIES.map(c => (
+                                        <button
+                                            key={c.code}
+                                            onClick={() => setCurrency(c.code)}
+                                            className={`
+                                                px-2 py-1 rounded-lg text-xs font-semibold
+                                                transition-all duration-200 cursor-pointer
+                                                ${currency === c.code
+                                                ? 'bg-[#1a6b4a] text-white shadow-[0_2px_8px_rgba(26,107,74,0.3)]'
+                                                : 'text-[#2d5a47] hover:bg-[#d1f0e0]/60'
+                                            }
+                                            `}
+                                        >
+                                            {c.label}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="flex items-center gap-1 bg-white/60 backdrop-blur-sm rounded-xl p-1 border border-[#c8e6d4]/60">
+                                    {LANGS.map(l => (
+                                        <button
+                                            key={l.code}
+                                            onClick={() => setLang(l.code as Lang)}
+                                            className={`
+                                                flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold
+                                                transition-all duration-200 cursor-pointer
+                                                ${lang === l.code
+                                                ? 'bg-[#1a6b4a] text-white shadow-[0_2px_8px_rgba(26,107,74,0.3)]'
+                                                : 'text-[#2d5a47] hover:bg-[#d1f0e0]/60'
+                                            }
+                                            `}
+                                            aria-label={`Switch to ${l.label}`}
+                                        >
+                                            <span>{l.flag}</span>
+                                            <span>{l.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                            <div className="flex items-center gap-1 bg-white/60 backdrop-blur-sm rounded-xl p-1 border border-[#c8e6d4]/60">
-                                {LANGS.map(l => (
-                                    <button
-                                        key={l.code}
-                                        onClick={() => setLang(l.code as Lang)}
-                                        className={`
-                      flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold
-                      transition-all duration-200 cursor-pointer
-                      ${lang === l.code
-                                            ? 'bg-[#1a6b4a] text-white shadow-[0_2px_8px_rgba(26,107,74,0.3)]'
-                                            : 'text-[#2d5a47] hover:bg-[#d1f0e0]/60'
-                                        }
-                    `}
-                                        aria-label={`Switch to ${l.label}`}
-                                    >
-                                        <span>{l.flag}</span>
-                                        <span className="hidden sm:inline">{l.label}</span>
-                                    </button>
-                                ))}
+
+                            {/* Mobile: combined dropdown */}
+                            <div className="md:hidden relative" ref={settingsRef}>
+                                <button
+                                    onClick={() => setSettingsOpen(!settingsOpen)}
+                                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/60 backdrop-blur-sm border border-[#c8e6d4]/60 text-xs font-semibold text-[#1a6b4a]"
+                                >
+                                    <span>{currentLang.flag}</span>
+                                    <span>{currentCurrency.label}</span>
+                                    <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${settingsOpen ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                {settingsOpen && (
+                                    <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-xl border border-[#c8e6d4]/60 p-3 z-50">
+                                        {/* Currency */}
+                                        <p className="text-[10px] font-semibold text-[#2d5a47]/50 uppercase tracking-wider mb-1.5 px-1">Currency</p>
+                                        <div className="flex gap-1 mb-3">
+                                            {CURRENCIES.map(c => (
+                                                <button
+                                                    key={c.code}
+                                                    onClick={() => { setCurrency(c.code); setSettingsOpen(false) }}
+                                                    className={`
+                                                        flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200
+                                                        ${currency === c.code
+                                                        ? 'bg-[#1a6b4a] text-white'
+                                                        : 'text-[#2d5a47] hover:bg-[#d1f0e0]/60'
+                                                    }
+                                                    `}
+                                                >
+                                                    {c.label}
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        {/* Language */}
+                                        <p className="text-[10px] font-semibold text-[#2d5a47]/50 uppercase tracking-wider mb-1.5 px-1">Language</p>
+                                        <div className="grid grid-cols-2 gap-1">
+                                            {LANGS.map(l => (
+                                                <button
+                                                    key={l.code}
+                                                    onClick={() => { setLang(l.code as Lang); setSettingsOpen(false) }}
+                                                    className={`
+                                                        flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200
+                                                        ${lang === l.code
+                                                        ? 'bg-[#1a6b4a] text-white'
+                                                        : 'text-[#2d5a47] hover:bg-[#d1f0e0]/60'
+                                                    }
+                                                    `}
+                                                >
+                                                    <span>{l.flag}</span>
+                                                    <span>{l.label}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Mobile burger */}
@@ -166,23 +240,23 @@ export function Header() {
 
                 {/* Mobile menu */}
                 <div className={`
-          md:hidden overflow-hidden transition-all duration-300 ease-in-out
-          ${menuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'}
-          bg-[#f0faf6]/98 backdrop-blur-md border-t border-[#c8e6d4]/60
-        `}>
+                    md:hidden overflow-hidden transition-all duration-300 ease-in-out
+                    ${menuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'}
+                    bg-[#f0faf6]/98 backdrop-blur-md border-t border-[#c8e6d4]/60
+                `}>
                     <nav className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-1">
                         {NAV_LINKS.map(link => (
                             <Link
                                 key={link.to}
                                 to={link.to}
                                 className={`
-                  text-base font-medium px-4 py-3 rounded-xl
-                  transition-colors duration-200
-                  ${isActive(link.to)
+                                    text-base font-medium px-4 py-3 rounded-xl
+                                    transition-colors duration-200
+                                    ${isActive(link.to)
                                     ? 'bg-[#1a6b4a]/10 text-[#1a6b4a] font-semibold'
                                     : 'text-[#1a6b4a] hover:bg-[#d1f0e0]/50'
                                 }
-                `}
+                                `}
                             >
                                 {t.nav[link.key]}
                             </Link>

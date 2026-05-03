@@ -24,6 +24,8 @@ import {
     CheckCircle,
     XCircle,
     Search,
+    ChevronDown,
+
     type LucideIcon,
 } from 'lucide-react'
 
@@ -66,4 +68,5 @@ export {
     Pill,
     Globe,
     Search,
+    ChevronDown,
 }
