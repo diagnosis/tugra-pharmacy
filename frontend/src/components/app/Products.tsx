@@ -8,6 +8,7 @@ import { categoryIcons } from '@/lib/icons.ts'
 import { Search, X, CheckCircle, XCircle, ArrowLeft, ArrowRight } from '@/lib/icons.ts'
 import type { Product } from '@/services/productService.ts'
 import {useCurrency} from "@/lib/currency/CurrencyContext.tsx";
+import { useSearch } from '@tanstack/react-router'
 
 const CATEGORY_KEYS = [
     'medications', 'vitamins', 'suncare', 'skincare', 'haircare',
@@ -20,10 +21,13 @@ const PAGE_SIZE = 12
 
 export function Products() {
     const { lang, t } = useLang()
-    const [activeCategory, setActiveCategory] = useState<CategoryKey | 'all'>('all')
     const [search, setSearch] = useState('')
     const [debouncedSearch] = useDebounceValue(search, 350)
     const [page, setPage] = useState(0)
+    const { category: initialCategory } = useSearch({ from: '/products/' })
+    const [activeCategory, setActiveCategory] = useState<CategoryKey | 'all'>(
+        (initialCategory as CategoryKey | 'all') ?? 'all'
+    )
 
     const handleCategoryChange = (cat: CategoryKey | 'all') => {
         setActiveCategory(cat)

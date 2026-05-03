@@ -4,6 +4,9 @@ import { Products } from '@/components/app/Products'
 import {SeoHead} from "@/lib/seo/SEOHead.tsx";
 
 export const Route = createFileRoute('/products/')({
+    validateSearch: (search) => ({
+        category: (search.category as string) ?? 'all',
+    }),
     component: ProductsPage,
 })
 
